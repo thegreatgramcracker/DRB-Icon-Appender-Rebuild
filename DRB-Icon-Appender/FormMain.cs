@@ -19,7 +19,7 @@ namespace DRB_Icon_Appender
         private const string DRB_PATH = @"\menu\menu.drb";
         private static Properties.Settings settings = Properties.Settings.Default;
 
-        private bool remastered;
+        private DRB.DRBVersion version;
         private DRB drb;
         private List<string> textures;
         private List<SpriteWrapper> sprites;
@@ -119,7 +119,7 @@ namespace DRB_Icon_Appender
         private void btnRestore_Click(object sender, EventArgs e)
         {
             closeFiles();
-            string drbPath = txtGameDir.Text + DRB_PATH + (remastered ? ".dcx" : "");
+            string drbPath = txtGameDir.Text + DRB_PATH + (version == DRB.DRBVersion.DarkSoulsRemastered ? ".dcx" : "");
             if (File.Exists(drbPath + ".bak"))
             {
                 File.Delete(drbPath);
@@ -130,7 +130,7 @@ namespace DRB_Icon_Appender
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            string drbPath = txtGameDir.Text + DRB_PATH + (remastered ? ".dcx" : "");
+            string drbPath = txtGameDir.Text + DRB_PATH + (version == DRB.DRBVersion.DarkSoulsRemastered ? ".dcx" : "");
             if (!File.Exists(drbPath + ".bak"))
                 File.Copy(drbPath, drbPath + ".bak");
             drb.Write(drbPath);
@@ -183,8 +183,8 @@ namespace DRB_Icon_Appender
             {
                 TexLeftEdge = 1,
                 TexTopEdge = 1,
-                TexRightEdge = (short)(remastered ? 160 : 80),
-                TexBottomEdge = (short)(remastered ? 180 : 90),
+                TexRightEdge = (short)(version == DRB.DRBVersion.DarkSoulsRemastered ? 160 : 80),
+                TexBottomEdge = (short)(version == DRB.DRBVersion.DarkSoulsRemastered ? 180 : 90),
             };
             var control = new DRB.Control.Static();
             var dlgo = new DRB.Dlgo($"EquIcon_{id:D4}", shape, control);
@@ -204,11 +204,11 @@ namespace DRB_Icon_Appender
         {
             if (File.Exists($@"{gameDir}\DARKSOULS.exe"))
             {
-                remastered = false;
+                version = DRB.DRBVersion.DarkSouls;
             }
             else if (File.Exists($@"{gameDir}\DarkSoulsRemastered.exe"))
             {
-                remastered = true;
+                version = DRB.DRBVersion.DarkSoulsRemastered;
             }
             else
             {
@@ -217,7 +217,7 @@ namespace DRB_Icon_Appender
             }
 
             TPF menuTPF;
-            string tpfPath = $"{gameDir}{TPF_PATH}{(remastered ? ".dcx" : "")}";
+            string tpfPath = $"{gameDir}{TPF_PATH}{(version == DRB.DRBVersion.DarkSoulsRemastered ? ".dcx" : "")}";
             try
             {
                 menuTPF = TPF.Read(tpfPath);
@@ -229,10 +229,10 @@ namespace DRB_Icon_Appender
             }
 
             DRB menuDRB;
-            string drbPath = $"{gameDir}{DRB_PATH}{(remastered ? ".dcx" : "")}";
+            string drbPath = $"{gameDir}{DRB_PATH}{(version == DRB.DRBVersion.DarkSoulsRemastered ? ".dcx" : "")}";
             try
             {
-                menuDRB = DRB.Read(drbPath, remastered);
+                menuDRB = DRB.Read(drbPath, version);
             }
             catch (Exception ex)
             {
