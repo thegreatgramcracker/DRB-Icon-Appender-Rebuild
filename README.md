@@ -1,6 +1,6 @@
 
-# DRB Icon Appender
-An item icon editing and creation tool for Dark Souls 1 and Remastered.  
+# DRB Icon Appender Rebuild
+An item icon editing and creation tool for Dark Souls 1, Remastered, and Demon's Souls.  
 Requires .NET 4.8
 
 # Instructions
