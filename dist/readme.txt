@@ -1,13 +1,9 @@
 
---| DRB Icon Appender 1.0
---| By TKGP
---| https://www.nexusmods.com/darksouls/mods/1457
---| https://github.com/JKAnderson/DRB-Icon-Appender
+--| DRB Icon Appender Rebuild 1.0
+--| By TKGP, updated by Greatgramcracker
+--| https://github.com/thegreatgramcracker/DRB-Icon-Appender-Rebuild
 
-An item icon editing and creation tool for Dark Souls 1 and Remastered.
-Requires .NET 4.7.2: https://www.microsoft.com/net/download/thank-you/net472
-Windows 10 users should already have this.
-
+An item icon editing and creation tool for Dark Souls 1 and Remastered. Requires .NET 4.8 or higher.
 
 --| Instructions
 
@@ -26,6 +22,9 @@ If done correctly, the texture will now be listed as an option in Icon Appender 
 
 
 --| Credits
+
+SoulsFormatsNEXT credits, original app and library by TKGP:
+https://github.com/soulsmods/SoulsFormatsNEXT
 
 Costura.Fody by Simon Cropp, Cameron MacFarland
 https://github.com/Fody/Costura
