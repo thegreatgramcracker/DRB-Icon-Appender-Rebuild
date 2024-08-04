@@ -1,8 +1,7 @@
 
 # DRB Icon Appender
-[NexusMods Page](https://www.nexusmods.com/darksouls/mods/1457)  
 An item icon editing and creation tool for Dark Souls 1 and Remastered.  
-Requires [.NET 4.7.2](https://www.microsoft.com/net/download/thank-you/net472) - Windows 10 users should already have this.  
+Requires .NET 4.8
 
 # Instructions
 [Video instructions](https://youtu.be/-K-tO9adAbY)
@@ -18,9 +17,12 @@ If done correctly, the texture will now be listed as an option in Icon Appender 
 
 # Building
 Standard users: ignore this section.  
-If you want to build the app yourself, you must download [DSFormats](https://github.com/JKAnderson/DSFormats), then "Add existing project" and add a reference to the project.
+If you want to build the app yourself, you must download [SoulsFormatsNEXT](https://github.com/soulsmods/SoulsFormatsNEXT), then "Add existing project" and add a reference to the project.
 
 # Credits
+
+[SoulsFormatsNEXT](https://github.com/soulsmods/SoulsFormatsNEXT) credits, original app and library by TKGP
+
 [Costura.Fody](https://github.com/Fody/Costura) by Simon Cropp, Cameron MacFarland
 
 [Octokit](https://github.com/octokit/octokit.net) by GitHub
