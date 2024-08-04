@@ -47,11 +47,13 @@
             this.dgvIconsTopEdgeCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvIconsWidthCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvIconsHeightCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.BlendMode = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ofdExecutable = new System.Windows.Forms.OpenFileDialog();
             this.llbUpdate = new System.Windows.Forms.LinkLabel();
             this.lblUpdate = new System.Windows.Forms.Label();
             this.nudIconID = new System.Windows.Forms.NumericUpDown();
             this.lblIconID = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             lblGameDir = new System.Windows.Forms.Label();
             toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dgvIcons)).BeginInit();
@@ -104,7 +106,7 @@
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.Enabled = false;
-            this.btnSave.Location = new System.Drawing.Point(498, 51);
+            this.btnSave.Location = new System.Drawing.Point(557, 51);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 8;
@@ -117,7 +119,7 @@
             // 
             this.btnAddIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnAddIcon.Enabled = false;
-            this.btnAddIcon.Location = new System.Drawing.Point(579, 550);
+            this.btnAddIcon.Location = new System.Drawing.Point(638, 550);
             this.btnAddIcon.Name = "btnAddIcon";
             this.btnAddIcon.Size = new System.Drawing.Size(75, 23);
             this.btnAddIcon.TabIndex = 12;
@@ -130,7 +132,7 @@
             // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Enabled = false;
-            this.btnClose.Location = new System.Drawing.Point(579, 51);
+            this.btnClose.Location = new System.Drawing.Point(638, 51);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 13;
@@ -157,7 +159,7 @@
             this.txtGameDir.Location = new System.Drawing.Point(12, 25);
             this.txtGameDir.Name = "txtGameDir";
             this.txtGameDir.ReadOnly = true;
-            this.txtGameDir.Size = new System.Drawing.Size(642, 20);
+            this.txtGameDir.Size = new System.Drawing.Size(701, 20);
             this.txtGameDir.TabIndex = 1;
             this.txtGameDir.Text = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DARK SOULS REMASTERED";
             // 
@@ -177,13 +179,15 @@
             this.dgvIconsTopLeftCol,
             this.dgvIconsTopEdgeCol,
             this.dgvIconsWidthCol,
-            this.dgvIconsHeightCol});
+            this.dgvIconsHeightCol,
+            this.BlendMode});
             this.dgvIcons.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
             this.dgvIcons.Location = new System.Drawing.Point(12, 80);
             this.dgvIcons.Name = "dgvIcons";
             this.dgvIcons.RowHeadersVisible = false;
-            this.dgvIcons.Size = new System.Drawing.Size(642, 454);
+            this.dgvIcons.Size = new System.Drawing.Size(701, 454);
             this.dgvIcons.TabIndex = 9;
+            this.dgvIcons.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvIcons_CellContentClick);
             this.dgvIcons.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgvIcons_DataError);
             // 
             // dgvIconsIDCol
@@ -224,10 +228,16 @@
             this.dgvIconsHeightCol.HeaderText = "Height";
             this.dgvIconsHeightCol.Name = "dgvIconsHeightCol";
             // 
+            // BlendMode
+            // 
+            this.BlendMode.DataPropertyName = "BlendingMode";
+            this.BlendMode.HeaderText = "Blending Mode";
+            this.BlendMode.Name = "BlendMode";
+            // 
             // ofdExecutable
             // 
-            this.ofdExecutable.Filter = "Dark Souls Executable|*.exe";
-            this.ofdExecutable.Title = "Select Dark Souls executable...";
+            this.ofdExecutable.Filter = "DS Executable or DeS EBOOT|*.exe;*.bin";
+            this.ofdExecutable.Title = "Select executable or EBOOT...";
             // 
             // llbUpdate
             // 
@@ -235,6 +245,7 @@
             this.llbUpdate.AutoSize = true;
             this.llbUpdate.Location = new System.Drawing.Point(12, 555);
             this.llbUpdate.Name = "llbUpdate";
+            this.llbUpdate.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.llbUpdate.Size = new System.Drawing.Size(114, 13);
             this.llbUpdate.TabIndex = 21;
             this.llbUpdate.TabStop = true;
@@ -255,7 +266,7 @@
             // nudIconID
             // 
             this.nudIconID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.nudIconID.Location = new System.Drawing.Point(453, 553);
+            this.nudIconID.Location = new System.Drawing.Point(512, 553);
             this.nudIconID.Maximum = new decimal(new int[] {
             9999,
             0,
@@ -269,17 +280,28 @@
             // 
             this.lblIconID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblIconID.AutoSize = true;
-            this.lblIconID.Location = new System.Drawing.Point(450, 537);
+            this.lblIconID.Location = new System.Drawing.Point(509, 537);
             this.lblIconID.Name = "lblIconID";
             this.lblIconID.Size = new System.Drawing.Size(42, 13);
             this.lblIconID.TabIndex = 23;
             this.lblIconID.Text = "Icon ID";
             // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(171, 547);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(145, 26);
+            this.label1.TabIndex = 24;
+            this.label1.Text = "Original by TKGP\r\nRebuild by Greatgramcracker";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(666, 585);
+            this.ClientSize = new System.Drawing.Size(725, 585);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblIconID);
             this.Controls.Add(this.nudIconID);
             this.Controls.Add(this.llbUpdate);
@@ -328,6 +350,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvIconsTopEdgeCol;
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvIconsWidthCol;
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvIconsHeightCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn BlendMode;
+        private System.Windows.Forms.Label label1;
     }
 }
 

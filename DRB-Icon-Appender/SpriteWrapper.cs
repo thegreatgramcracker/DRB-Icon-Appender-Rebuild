@@ -46,6 +46,12 @@ namespace DRB_Icon_Appender
             set => Sprite.TexBottomEdge = (short)(value + Sprite.TexTopEdge);
         }
 
+        public DRB.Shape.BlendingMode BlendingMode
+        {
+            get => Sprite.BlendMode;
+            set => Sprite.BlendMode = value;
+        }
+
         public SpriteWrapper(DRB.Dlgo dlgo, List<string> textures)
         {
             Dlgo = dlgo;

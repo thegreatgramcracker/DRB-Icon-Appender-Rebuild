@@ -14,7 +14,7 @@ namespace DRB_Icon_Appender
 {
     public partial class FormMain : Form
     {
-        private const string UPDATE_URL = "https://www.nexusmods.com/darksouls/mods/1457?tab=files";
+        private const string UPDATE_URL = "https://github.com/thegreatgramcracker/DRB-Icon-Appender-Rebuild/releases";
         private const string TPF_PATH = @"\menu\menu.tpf";
         private const string DRB_PATH = @"\menu\menu.drb";
         private static Properties.Settings settings = Properties.Settings.Default;
@@ -35,7 +35,7 @@ namespace DRB_Icon_Appender
 
         private async void FormMain_Load(object sender, EventArgs e)
         {
-            Text = "DRB Icon Appender " + System.Windows.Forms.Application.ProductVersion;
+            Text = "DRB Icon Appender Rebuild " + System.Windows.Forms.Application.ProductVersion;
             Location = settings.WindowLocation;
             Size = settings.WindowSize;
             if (settings.WindowMaximized)
@@ -44,10 +44,10 @@ namespace DRB_Icon_Appender
             txtGameDir.Text = settings.GameDir;
             loadFiles(txtGameDir.Text, true);
 
-            GitHubClient gitHubClient = new GitHubClient(new ProductHeaderValue("DRB-Icon-Appender"));
+            GitHubClient gitHubClient = new GitHubClient(new ProductHeaderValue("DRB-Icon-Appender-Rebuild"));
             try
             {
-                Release release = await gitHubClient.Repository.Release.GetLatest("JKAnderson", "DRB-Icon-Appender");
+                Release release = await gitHubClient.Repository.Release.GetLatest("thegreatgramcracker", "DRB-Icon-Appender-Rebuild");
                 if (SemVersion.Parse(release.TagName) > System.Windows.Forms.Application.ProductVersion)
                 {
                     lblUpdate.Visible = false;
@@ -202,7 +202,7 @@ namespace DRB_Icon_Appender
 
         private void loadFiles(string gameDir, bool silent = false)
         {
-            if (File.Exists($@"{gameDir}\DARKSOULS.exe"))
+            if (File.Exists($@"{gameDir}\DARKSOULS.exe") || File.Exists($@"{gameDir}\EBOOT.bin"))
             {
                 version = DRB.DRBVersion.DarkSouls;
             }
@@ -286,6 +286,11 @@ namespace DRB_Icon_Appender
         {
             if (!silent)
                 MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void dgvIcons_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }
