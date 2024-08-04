@@ -259,3 +259,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/dist/DRB Icon Appender Rebuild/readme.txt
+/dist/DRB Icon Appender Rebuild/DRB-Icon-Appender.exe.config
+/dist/DRB Icon Appender Rebuild/DRB-Icon-Appender.exe
