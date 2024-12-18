@@ -94,6 +94,7 @@ namespace DRB_Icon_Appender
             btnBrowse.Enabled = !enable;
             btnOpen.Enabled = !enable;
             btnAddIcon.Enabled = enable;
+            btnBatchAddIcons.Enabled = enable;
             btnSave.Enabled = enable;
             btnClose.Enabled = enable;
         }
@@ -200,6 +201,109 @@ namespace DRB_Icon_Appender
                     dgvIcons.CurrentCell = row.Cells[0];
         }
 
+        private bool RangeHasDuplicates(int startId, int endId, out List<int> duplicateIds)
+        {
+            duplicateIds = new List<int>();
+
+            // Check all existing IDs in the sprites list
+            HashSet<int> existingIds = sprites.Select(sprite => sprite.ID).ToHashSet();
+
+            // Check the range for duplicates
+            for (int id = startId; id <= endId; id++)
+            {
+                if (existingIds.Contains(id))
+                {
+                    duplicateIds.Add(id);
+                }
+            }
+
+            return duplicateIds.Count > 0;
+        }
+
+        public void BatchAddIcons(int startId, int endId, string selectedTexture, int width, int height, int rows, int columns, int margin, int startRow, int startColumn)
+        {
+            if (startId > endId)
+            {
+                MessageBox.Show("The starting ID must not exceed the ending ID.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Validate the range for duplicates
+            if (RangeHasDuplicates(startId, endId, out List<int> duplicateIds))
+            {
+                string duplicateMessage = $"The following IDs are already in use: {string.Join(", ", duplicateIds)}.";
+                MessageBox.Show(duplicateMessage, "Duplicate IDs Detected", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return; // Cancel operation if duplicates exist
+            }
+
+            int tileSize = width + (margin * 2); // Icon resolution + margin
+            int leftEdge = 1 + startColumn * tileSize; // Start at selected column
+            int topEdge = 1 + startRow * tileSize; // Start at selected row
+            int columnCount = startColumn; // Start at the selected column
+            int rowCount = startRow; // Add row tracking
+
+            for (int id = startId; id <= endId; id++)
+            {
+                var shape = new DRB.Shape.Sprite()
+                {
+                    TexLeftEdge = (short)leftEdge,
+                    TexTopEdge = (short)topEdge,
+                    TexRightEdge = (short)(leftEdge + width),
+                    TexBottomEdge = (short)(topEdge + height),
+                };
+
+                var control = new DRB.Control.Static();
+                var dlgo = new DRB.Dlgo($"EquIcon_{id:D4}", shape, control);
+                DRB.Dlg icons = drb.Dlgs.Find(dlg => dlg.Name == "Icon");
+                icons.Dlgos.Add(dlgo);
+
+                var sprite = new SpriteWrapper(dlgo, textures);
+                sprite.Texture = selectedTexture;
+                iconBindingSource.Add(sprite);
+
+                // Update Left Edge and Top Edge for the next icon
+                columnCount++;
+                if (columnCount >= columns)
+                {
+                    // Move to the next row
+                    columnCount = 0;
+                    leftEdge = 1; // Reset Left Edge
+                    rowCount++;
+                    topEdge = 1 + rowCount * tileSize; // Increment Top Edge by tile size
+                }
+                else
+                {
+                    // Same row: move Left Edge
+                    leftEdge += tileSize;
+                }
+            }
+
+            sprites.Sort();
+            dgvIcons.Refresh();
+        }
+
+        private void btnBatchAddIcons_Click(object sender, EventArgs e)
+        {
+            using (var batchAddForm = new FormBatchAdd(this, this.Textures))
+            {
+                if (batchAddForm.ShowDialog() == DialogResult.OK)
+                {
+                    BatchAddIcons(
+                        batchAddForm.RangeStart,
+                        batchAddForm.RangeEnd,
+                        batchAddForm.SelectedTexture,
+                        batchAddForm.Width,
+                        batchAddForm.Height,
+                        batchAddForm.Rows,
+                        batchAddForm.Columns,
+                        batchAddForm.PixelMargin,
+                        batchAddForm.StartRow,
+                        batchAddForm.StartColumn
+                    );
+                }
+            }
+        }
+
         private void loadFiles(string gameDir, bool silent = false)
         {
             if (File.Exists($@"{gameDir}\DARKSOULS.exe") || File.Exists($@"{gameDir}\EBOOT.bin"))
@@ -265,6 +369,10 @@ namespace DRB_Icon_Appender
             }
             sprites.Sort();
             iconBindingSource.DataSource = sprites;
+        }
+        public List<string> Textures
+        {
+            get { return textures; }
         }
 
         private void closeFiles()

@@ -39,6 +39,7 @@
             this.btnAddIcon = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.btnOpen = new System.Windows.Forms.Button();
+            this.btnBatchAddIcons = new System.Windows.Forms.Button();
             this.txtGameDir = new System.Windows.Forms.TextBox();
             this.dgvIcons = new System.Windows.Forms.DataGridView();
             this.dgvIconsIDCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -85,7 +86,7 @@
             this.btnExplore.Location = new System.Drawing.Point(174, 51);
             this.btnExplore.Name = "btnExplore";
             this.btnExplore.Size = new System.Drawing.Size(75, 23);
-            this.btnExplore.TabIndex = 3;
+            this.btnExplore.TabIndex = 4;
             this.btnExplore.Text = "Explore";
             toolTip1.SetToolTip(this.btnExplore, "Open the game directory in Explorer");
             this.btnExplore.UseVisualStyleBackColor = true;
@@ -96,7 +97,7 @@
             this.btnRestore.Location = new System.Drawing.Point(255, 51);
             this.btnRestore.Name = "btnRestore";
             this.btnRestore.Size = new System.Drawing.Size(75, 23);
-            this.btnRestore.TabIndex = 7;
+            this.btnRestore.TabIndex = 5;
             this.btnRestore.Text = "Restore";
             toolTip1.SetToolTip(this.btnRestore, "Restore backed-up files and reload");
             this.btnRestore.UseVisualStyleBackColor = true;
@@ -109,7 +110,7 @@
             this.btnSave.Location = new System.Drawing.Point(557, 51);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
-            this.btnSave.TabIndex = 8;
+            this.btnSave.TabIndex = 6;
             this.btnSave.Text = "Save";
             toolTip1.SetToolTip(this.btnSave, "Save changes");
             this.btnSave.UseVisualStyleBackColor = true;
@@ -119,10 +120,10 @@
             // 
             this.btnAddIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnAddIcon.Enabled = false;
-            this.btnAddIcon.Location = new System.Drawing.Point(638, 550);
+            this.btnAddIcon.Location = new System.Drawing.Point(557, 550);
             this.btnAddIcon.Name = "btnAddIcon";
             this.btnAddIcon.Size = new System.Drawing.Size(75, 23);
-            this.btnAddIcon.TabIndex = 12;
+            this.btnAddIcon.TabIndex = 13;
             this.btnAddIcon.Text = "Add Icon";
             toolTip1.SetToolTip(this.btnAddIcon, "Create a new icon with the given ID");
             this.btnAddIcon.UseVisualStyleBackColor = true;
@@ -135,7 +136,7 @@
             this.btnClose.Location = new System.Drawing.Point(638, 51);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
-            this.btnClose.TabIndex = 13;
+            this.btnClose.TabIndex = 7;
             this.btnClose.Text = "Close";
             toolTip1.SetToolTip(this.btnClose, "Close files without saving");
             this.btnClose.UseVisualStyleBackColor = true;
@@ -146,11 +147,24 @@
             this.btnOpen.Location = new System.Drawing.Point(93, 51);
             this.btnOpen.Name = "btnOpen";
             this.btnOpen.Size = new System.Drawing.Size(75, 23);
-            this.btnOpen.TabIndex = 14;
+            this.btnOpen.TabIndex = 3;
             this.btnOpen.Text = "Open";
             toolTip1.SetToolTip(this.btnOpen, "Load files from the game directory");
             this.btnOpen.UseVisualStyleBackColor = true;
             this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            // 
+            // btnBatchAddIcons
+            // 
+            this.btnBatchAddIcons.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBatchAddIcons.Enabled = false;
+            this.btnBatchAddIcons.Location = new System.Drawing.Point(638, 550);
+            this.btnBatchAddIcons.Name = "btnBatchAddIcons";
+            this.btnBatchAddIcons.Size = new System.Drawing.Size(75, 23);
+            this.btnBatchAddIcons.TabIndex = 14;
+            this.btnBatchAddIcons.Text = "Batch Add";
+            toolTip1.SetToolTip(this.btnBatchAddIcons, "Create a new icon with the given ID");
+            this.btnBatchAddIcons.UseVisualStyleBackColor = true;
+            this.btnBatchAddIcons.Click += new System.EventHandler(this.btnBatchAddIcons_Click);
             // 
             // txtGameDir
             // 
@@ -186,7 +200,7 @@
             this.dgvIcons.Name = "dgvIcons";
             this.dgvIcons.RowHeadersVisible = false;
             this.dgvIcons.Size = new System.Drawing.Size(701, 454);
-            this.dgvIcons.TabIndex = 9;
+            this.dgvIcons.TabIndex = 8;
             this.dgvIcons.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvIcons_CellContentClick);
             this.dgvIcons.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgvIcons_DataError);
             // 
@@ -247,7 +261,7 @@
             this.llbUpdate.Name = "llbUpdate";
             this.llbUpdate.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.llbUpdate.Size = new System.Drawing.Size(114, 13);
-            this.llbUpdate.TabIndex = 21;
+            this.llbUpdate.TabIndex = 9;
             this.llbUpdate.TabStop = true;
             this.llbUpdate.Text = "New version available!";
             this.llbUpdate.Visible = false;
@@ -266,7 +280,7 @@
             // nudIconID
             // 
             this.nudIconID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.nudIconID.Location = new System.Drawing.Point(512, 553);
+            this.nudIconID.Location = new System.Drawing.Point(431, 553);
             this.nudIconID.Maximum = new decimal(new int[] {
             9999,
             0,
@@ -274,16 +288,16 @@
             0});
             this.nudIconID.Name = "nudIconID";
             this.nudIconID.Size = new System.Drawing.Size(120, 20);
-            this.nudIconID.TabIndex = 22;
+            this.nudIconID.TabIndex = 12;
             // 
             // lblIconID
             // 
             this.lblIconID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblIconID.AutoSize = true;
-            this.lblIconID.Location = new System.Drawing.Point(509, 537);
+            this.lblIconID.Location = new System.Drawing.Point(428, 537);
             this.lblIconID.Name = "lblIconID";
             this.lblIconID.Size = new System.Drawing.Size(42, 13);
-            this.lblIconID.TabIndex = 23;
+            this.lblIconID.TabIndex = 11;
             this.lblIconID.Text = "Icon ID";
             // 
             // label1
@@ -293,7 +307,7 @@
             this.label1.Location = new System.Drawing.Point(171, 547);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(145, 26);
-            this.label1.TabIndex = 24;
+            this.label1.TabIndex = 10;
             this.label1.Text = "Original by TKGP\r\nRebuild by Greatgramcracker";
             // 
             // FormMain
@@ -301,6 +315,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(725, 585);
+            this.Controls.Add(this.btnBatchAddIcons);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblIconID);
             this.Controls.Add(this.nudIconID);
@@ -352,6 +367,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvIconsHeightCol;
         private System.Windows.Forms.DataGridViewTextBoxColumn BlendMode;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnBatchAddIcons;
     }
 }
 
