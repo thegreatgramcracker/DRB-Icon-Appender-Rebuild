@@ -21,6 +21,8 @@ If you want to build the app yourself, you must download [SoulsFormatsNEXT](http
 
 # Credits
 
+Xenthos for creating the batch editting options
+
 [SoulsFormatsNEXT](https://github.com/soulsmods/SoulsFormatsNEXT) credits, original app and library by TKGP
 
 [Costura.Fody](https://github.com/Fody/Costura) by Simon Cropp, Cameron MacFarland
