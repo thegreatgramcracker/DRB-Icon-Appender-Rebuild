@@ -220,7 +220,7 @@ namespace DRB_Icon_Appender
             return duplicateIds.Count > 0;
         }
 
-        public void BatchAddIcons(int startId, int endId, string selectedTexture, int width, int height, int rows, int columns)
+        public void BatchAddIcons(int startId, int endId, string selectedTexture, int width, int height, int rows, int columns, int margin, int startRow, int startColumn)
         {
             if (startId > endId)
             {
@@ -236,14 +236,14 @@ namespace DRB_Icon_Appender
                 return; // Cancel operation if duplicates exist
             }
 
-            int tileSize = width + 2; // Icon resolution + margin
-            int leftEdge = 1; // Initial Left Edge
-            int topEdge = 1;  // Initial Top Edge
-            int columnCount = 0; // Track the current column within a row
+            int tileSize = width + (margin * 2); // Icon resolution + margin
+            int leftEdge = 1 + startColumn * tileSize; // Start at selected column
+            int topEdge = 1 + startRow * tileSize; // Start at selected row
+            int columnCount = startColumn; // Start at the selected column
+            int rowCount = startRow; // Add row tracking
 
             for (int id = startId; id <= endId; id++)
             {
-                // Create the sprite with calculated edges
                 var shape = new DRB.Shape.Sprite()
                 {
                     TexLeftEdge = (short)leftEdge,
@@ -258,7 +258,7 @@ namespace DRB_Icon_Appender
                 icons.Dlgos.Add(dlgo);
 
                 var sprite = new SpriteWrapper(dlgo, textures);
-                sprite.Texture = selectedTexture; // Assign texture
+                sprite.Texture = selectedTexture;
                 iconBindingSource.Add(sprite);
 
                 // Update Left Edge and Top Edge for the next icon
@@ -268,12 +268,13 @@ namespace DRB_Icon_Appender
                     // Move to the next row
                     columnCount = 0;
                     leftEdge = 1; // Reset Left Edge
-                    topEdge += tileSize; // Increment Top Edge by tile size
+                    rowCount++;
+                    topEdge = 1 + rowCount * tileSize; // Increment Top Edge by tile size
                 }
                 else
                 {
-                    // Move to the next column
-                    leftEdge += tileSize; // Increment Left Edge by tile size
+                    // Same row: move Left Edge
+                    leftEdge += tileSize;
                 }
             }
 
@@ -294,7 +295,10 @@ namespace DRB_Icon_Appender
                         batchAddForm.Width,
                         batchAddForm.Height,
                         batchAddForm.Rows,
-                        batchAddForm.Columns
+                        batchAddForm.Columns,
+                        batchAddForm.PixelMargin,
+                        batchAddForm.StartRow,
+                        batchAddForm.StartColumn
                     );
                 }
             }
