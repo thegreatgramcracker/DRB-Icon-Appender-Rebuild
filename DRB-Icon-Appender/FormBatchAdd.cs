@@ -84,8 +84,8 @@ namespace DRB_Icon_Appender
         public int StartRow => selectedCell.X; // Row of selected cell
         public int StartColumn => selectedCell.Y; // Column of selected cell
 
-        private const int MaxPanelWidth = 292;  // Maximum width of the grid panel
-        private const int MaxPanelHeight = 292; // Maximum height of the grid panel
+        private const int MaxPanelWidth = 322;  // Maximum width of the grid panel
+        private const int MaxPanelHeight = 322; // Maximum height of the grid panel
 
         private void FormBatchAdd_Load(object sender, EventArgs e)
         {
@@ -337,10 +337,15 @@ namespace DRB_Icon_Appender
                 return;
             }
 
-            // Validate for duplicate IDs
-            if (mainForm.RangeHasDuplicates(RangeStart, RangeEnd, out List<int> duplicateIds))
+            // Validate for duplicate IDs and suggest the next available range
+            int totalIcons = RangeEnd - RangeStart + 1;
+            if (mainForm.RangeHasDuplicates(RangeStart, RangeEnd, totalIcons, out List<int> duplicateIds, out var nextAvailableRange))
             {
                 string duplicateMessage = $"The following IDs are already in use: {string.Join(", ", duplicateIds)}.";
+                if (nextAvailableRange.HasValue)
+                {
+                    duplicateMessage += $"\n\nSuggested Range: {nextAvailableRange.Value.Start} to {nextAvailableRange.Value.End}.";
+                }
                 MessageBox.Show(duplicateMessage, "Duplicate IDs Detected", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 // Prevent the form from closing
@@ -769,6 +774,27 @@ namespace DRB_Icon_Appender
             if (isAutoSetEnabled)
             {
                 AutoSetGridSize(); // Trigger Auto Set logic when enabled
+            }
+        }
+
+        private void btnAutoSetRange_Click(object sender, EventArgs e)
+        {
+            int totalIcons = RangeEnd - RangeStart + 1;
+            if (mainForm.RangeHasDuplicates((int)nudBatchAddRangeStart.Value, (int)nudBatchAddRangeEnd.Value, totalIcons, out _, out var nextAvailableRange))
+            {
+                if (nextAvailableRange.HasValue)
+                {
+                    nudBatchAddRangeStart.Value = nextAvailableRange.Value.Start;
+                    nudBatchAddRangeEnd.Value = nextAvailableRange.Value.End;
+                }
+                else
+                {
+                    MessageBox.Show("No available range found within the valid ID limits.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("The current range is already valid.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }

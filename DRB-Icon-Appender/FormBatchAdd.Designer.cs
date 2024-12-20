@@ -58,6 +58,7 @@
             this.grpBoxGridPreview = new System.Windows.Forms.GroupBox();
             this.lblGridExplanation = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.btnAutoSetRange = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nudBatchAddRangeStart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudBatchAddRangeEnd)).BeginInit();
             this.grpBoxIconRange.SuspendLayout();
@@ -112,12 +113,13 @@
             // 
             // grpBoxIconRange
             // 
+            this.grpBoxIconRange.Controls.Add(this.btnAutoSetRange);
             this.grpBoxIconRange.Controls.Add(this.nudBatchAddRangeEnd);
             this.grpBoxIconRange.Controls.Add(this.nudBatchAddRangeStart);
             this.grpBoxIconRange.Controls.Add(this.lblDivider);
             this.grpBoxIconRange.Location = new System.Drawing.Point(12, 12);
             this.grpBoxIconRange.Name = "grpBoxIconRange";
-            this.grpBoxIconRange.Size = new System.Drawing.Size(158, 51);
+            this.grpBoxIconRange.Size = new System.Drawing.Size(158, 79);
             this.grpBoxIconRange.TabIndex = 2;
             this.grpBoxIconRange.TabStop = false;
             this.grpBoxIconRange.Text = "Icon Range";
@@ -133,10 +135,11 @@
             // 
             // grpBoxTexture
             // 
+            this.grpBoxTexture.Controls.Add(this.chkAutoSet);
             this.grpBoxTexture.Controls.Add(this.comboBoxTexture);
-            this.grpBoxTexture.Location = new System.Drawing.Point(12, 69);
+            this.grpBoxTexture.Location = new System.Drawing.Point(12, 97);
             this.grpBoxTexture.Name = "grpBoxTexture";
-            this.grpBoxTexture.Size = new System.Drawing.Size(158, 51);
+            this.grpBoxTexture.Size = new System.Drawing.Size(158, 70);
             this.grpBoxTexture.TabIndex = 3;
             this.grpBoxTexture.TabStop = false;
             this.grpBoxTexture.Text = "Texture";
@@ -198,7 +201,7 @@
             this.grpBoxIconResolution.Controls.Add(this.txtBoxWidth);
             this.grpBoxIconResolution.Controls.Add(this.lblWidth);
             this.grpBoxIconResolution.Controls.Add(this.txtBoxHeight);
-            this.grpBoxIconResolution.Location = new System.Drawing.Point(12, 126);
+            this.grpBoxIconResolution.Location = new System.Drawing.Point(12, 173);
             this.grpBoxIconResolution.Name = "grpBoxIconResolution";
             this.grpBoxIconResolution.Size = new System.Drawing.Size(158, 135);
             this.grpBoxIconResolution.TabIndex = 8;
@@ -296,14 +299,13 @@
             // 
             // grpBoxGridSize
             // 
-            this.grpBoxGridSize.Controls.Add(this.chkAutoSet);
             this.grpBoxGridSize.Controls.Add(this.txtBoxRows);
             this.grpBoxGridSize.Controls.Add(this.lblRows);
             this.grpBoxGridSize.Controls.Add(this.txtBoxColumns);
             this.grpBoxGridSize.Controls.Add(this.lblColumns);
-            this.grpBoxGridSize.Location = new System.Drawing.Point(12, 267);
+            this.grpBoxGridSize.Location = new System.Drawing.Point(12, 314);
             this.grpBoxGridSize.Name = "grpBoxGridSize";
-            this.grpBoxGridSize.Size = new System.Drawing.Size(158, 96);
+            this.grpBoxGridSize.Size = new System.Drawing.Size(158, 77);
             this.grpBoxGridSize.TabIndex = 12;
             this.grpBoxGridSize.TabStop = false;
             this.grpBoxGridSize.Text = "Grid Size";
@@ -313,18 +315,18 @@
             this.chkAutoSet.AutoSize = true;
             this.chkAutoSet.Checked = true;
             this.chkAutoSet.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkAutoSet.Location = new System.Drawing.Point(48, 72);
+            this.chkAutoSet.Location = new System.Drawing.Point(6, 45);
             this.chkAutoSet.Name = "chkAutoSet";
-            this.chkAutoSet.Size = new System.Drawing.Size(67, 17);
+            this.chkAutoSet.Size = new System.Drawing.Size(143, 17);
             this.chkAutoSet.TabIndex = 12;
-            this.chkAutoSet.Text = "Auto Set";
+            this.chkAutoSet.Text = "Auto Set Icon/Grid Sizes";
             this.chkAutoSet.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chkAutoSet.UseVisualStyleBackColor = true;
             this.chkAutoSet.CheckedChanged += new System.EventHandler(this.ChkAutoSet_CheckedChanged);
             // 
             // btnConfirm
             // 
-            this.btnConfirm.Location = new System.Drawing.Point(12, 380);
+            this.btnConfirm.Location = new System.Drawing.Point(12, 397);
             this.btnConfirm.Name = "btnConfirm";
             this.btnConfirm.Size = new System.Drawing.Size(335, 23);
             this.btnConfirm.TabIndex = 13;
@@ -337,7 +339,7 @@
             this.pnlGridPreview.AutoScroll = true;
             this.pnlGridPreview.Location = new System.Drawing.Point(6, 19);
             this.pnlGridPreview.Name = "pnlGridPreview";
-            this.pnlGridPreview.Size = new System.Drawing.Size(292, 292);
+            this.pnlGridPreview.Size = new System.Drawing.Size(322, 322);
             this.pnlGridPreview.TabIndex = 15;
             // 
             // grpBoxGridPreview
@@ -346,7 +348,7 @@
             this.grpBoxGridPreview.Controls.Add(this.pnlGridPreview);
             this.grpBoxGridPreview.Location = new System.Drawing.Point(176, 12);
             this.grpBoxGridPreview.Name = "grpBoxGridPreview";
-            this.grpBoxGridPreview.Size = new System.Drawing.Size(304, 351);
+            this.grpBoxGridPreview.Size = new System.Drawing.Size(335, 379);
             this.grpBoxGridPreview.TabIndex = 16;
             this.grpBoxGridPreview.TabStop = false;
             this.grpBoxGridPreview.Text = "Icons to Add (Grid Preview)";
@@ -354,9 +356,9 @@
             // lblGridExplanation
             // 
             this.lblGridExplanation.ForeColor = System.Drawing.Color.DimGray;
-            this.lblGridExplanation.Location = new System.Drawing.Point(6, 327);
+            this.lblGridExplanation.Location = new System.Drawing.Point(7, 353);
             this.lblGridExplanation.Name = "lblGridExplanation";
-            this.lblGridExplanation.Size = new System.Drawing.Size(292, 13);
+            this.lblGridExplanation.Size = new System.Drawing.Size(322, 13);
             this.lblGridExplanation.TabIndex = 17;
             this.lblGridExplanation.Text = "Left click to set start position. Right click to set end position.";
             this.lblGridExplanation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -364,12 +366,22 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(353, 380);
+            this.btnCancel.Location = new System.Drawing.Point(353, 397);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(127, 23);
+            this.btnCancel.Size = new System.Drawing.Size(158, 23);
             this.btnCancel.TabIndex = 14;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            // 
+            // btnAutoSetRange
+            // 
+            this.btnAutoSetRange.Location = new System.Drawing.Point(6, 45);
+            this.btnAutoSetRange.Name = "btnAutoSetRange";
+            this.btnAutoSetRange.Size = new System.Drawing.Size(145, 23);
+            this.btnAutoSetRange.TabIndex = 2;
+            this.btnAutoSetRange.Text = "Set Next Available Range";
+            this.btnAutoSetRange.UseVisualStyleBackColor = true;
+            this.btnAutoSetRange.Click += new System.EventHandler(this.btnAutoSetRange_Click);
             // 
             // FormBatchAdd
             // 
@@ -378,7 +390,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(491, 415);
+            this.ClientSize = new System.Drawing.Size(522, 425);
             this.Controls.Add(this.grpBoxGridPreview);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnConfirm);
@@ -397,6 +409,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudBatchAddRangeEnd)).EndInit();
             this.grpBoxIconRange.ResumeLayout(false);
             this.grpBoxTexture.ResumeLayout(false);
+            this.grpBoxTexture.PerformLayout();
             this.grpBoxIconResolution.ResumeLayout(false);
             this.grpBoxIconResolution.PerformLayout();
             this.grpBoxGridSize.ResumeLayout(false);
@@ -436,5 +449,6 @@
         private System.Windows.Forms.Label lblEffectiveTileSize;
         private System.Windows.Forms.Label lblGridExplanation;
         private System.Windows.Forms.CheckBox chkAutoSet;
+        private System.Windows.Forms.Button btnAutoSetRange;
     }
 }

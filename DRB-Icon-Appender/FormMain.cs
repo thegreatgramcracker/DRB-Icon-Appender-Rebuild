@@ -206,9 +206,10 @@ namespace DRB_Icon_Appender
                     dgvIcons.CurrentCell = row.Cells[0];
         }
 
-        public bool RangeHasDuplicates(int startId, int endId, out List<int> duplicateIds)
+        public bool RangeHasDuplicates(int startId, int endId, int totalIcons, out List<int> duplicateIds, out (int Start, int End)? nextAvailableRange)
         {
             duplicateIds = new List<int>();
+            nextAvailableRange = null;
 
             // Check all existing IDs in the sprites list
             HashSet<int> existingIds = sprites.Select(sprite => sprite.ID).ToHashSet();
@@ -220,6 +221,24 @@ namespace DRB_Icon_Appender
                 {
                     duplicateIds.Add(id);
                 }
+            }
+
+            // If duplicates exist, calculate the next available range
+            if (duplicateIds.Count > 0)
+            {
+                int nextStart = startId;
+                while (existingIds.Contains(nextStart))
+                    nextStart++;
+
+                int nextEnd = nextStart + totalIcons - 1;
+                while (existingIds.Contains(nextEnd))
+                {
+                    nextStart++;
+                    nextEnd = nextStart + totalIcons - 1;
+                }
+
+                if (nextEnd <= 9999) // Ensure the range doesn't exceed the limit
+                    nextAvailableRange = (nextStart, nextEnd);
             }
 
             return duplicateIds.Count > 0;
@@ -234,9 +253,13 @@ namespace DRB_Icon_Appender
             }
 
             // Validate the range for duplicates
-            if (RangeHasDuplicates(startId, endId, out List<int> duplicateIds))
+            if (RangeHasDuplicates(startId, endId, endId - startId + 1, out List<int> duplicateIds, out var nextAvailableRange))
             {
                 string duplicateMessage = $"The following IDs are already in use: {string.Join(", ", duplicateIds)}.";
+                if (nextAvailableRange.HasValue)
+                {
+                    duplicateMessage += $"\n\nSuggested Range: {nextAvailableRange.Value.Start} to {nextAvailableRange.Value.End}.";
+                }
                 MessageBox.Show(duplicateMessage, "Duplicate IDs Detected", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return; // Cancel operation if duplicates exist
             }
