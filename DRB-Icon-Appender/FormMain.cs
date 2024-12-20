@@ -201,7 +201,7 @@ namespace DRB_Icon_Appender
                     dgvIcons.CurrentCell = row.Cells[0];
         }
 
-        private bool RangeHasDuplicates(int startId, int endId, out List<int> duplicateIds)
+        public bool RangeHasDuplicates(int startId, int endId, out List<int> duplicateIds)
         {
             duplicateIds = new List<int>();
 

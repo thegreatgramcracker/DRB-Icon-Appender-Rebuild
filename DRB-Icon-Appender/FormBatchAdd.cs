@@ -15,20 +15,36 @@ namespace DRB_Icon_Appender
         private FormMain mainForm;
         private List<string> textures;
 
+        private int rangeDifference; // Tracks the difference between Start and End
+        private int maxIcons;        // Maximum icons based on grid dimensions
+
         public FormBatchAdd(FormMain mainForm, List<string> textures)
         {
             InitializeComponent();
-            this.mainForm = mainForm; // Store the FormMain instance
-            this.textures = textures; // Store the textures list
 
-            // Populate default grid
+            this.mainForm = mainForm;
+            this.textures = textures;
+
+            // Populate the grid and dropdowns
             GenerateGrid(int.Parse(txtBoxRows.Text), int.Parse(txtBoxColumns.Text));
-            // Highlight default range
-            int totalIcons = CalculateIconCount();
-            HighlightGrid(totalIcons);
-
-            // Populate the ComboBox with sorted textures
             PopulateTextureDropdown();
+
+            // Initialize the range difference
+            rangeDifference = (int)nudBatchAddRangeEnd.Value - (int)nudBatchAddRangeStart.Value;
+
+            // Initialize constraints
+            UpdateRangeEndConstraints();
+
+            // Highlight initial grid preview
+            HighlightGrid(CalculateIconCount());
+
+            // Attach event handlers for dynamic updates
+            txtBoxWidth.TextChanged += txtBoxWidth_TextChanged;
+            txtBoxHeight.TextChanged += txtBoxHeight_TextChanged;
+            txtBoxMargins.TextChanged += txtBoxMargins_TextChanged;
+
+            // Update Effective Tile Size on load
+            UpdateEffectiveTileSize();
         }
 
         public int RangeStart => (int)nudBatchAddRangeStart.Value;
@@ -36,6 +52,7 @@ namespace DRB_Icon_Appender
         public string SelectedTexture => comboBoxTexture.SelectedItem.ToString();
         public int Width => int.Parse(txtBoxWidth.Text);
         public int Height => int.Parse(txtBoxHeight.Text);
+        public int PixelMargin => int.Parse(txtBoxMargins.Text);
         public int Rows => int.Parse(txtBoxRows.Text);
         public int Columns => int.Parse(txtBoxColumns.Text);
         public int StartRow => selectedCell.X; // Row of selected cell
@@ -59,14 +76,99 @@ namespace DRB_Icon_Appender
 
         private void nudBatchAddRangeStart_ValueChanged(object sender, EventArgs e)
         {
-            int totalIcons = CalculateIconCount();
-            HighlightGrid(totalIcons);
+            UpdateRange(); // Recalculate `End` while preserving the range difference
         }
 
         private void nudBatchAddRangeEnd_ValueChanged(object sender, EventArgs e)
         {
-            int totalIcons = CalculateIconCount();
-            HighlightGrid(totalIcons);
+            // Recalculate the range difference
+            rangeDifference = (int)nudBatchAddRangeEnd.Value - (int)nudBatchAddRangeStart.Value;
+
+            // Update the grid preview
+            HighlightGrid(CalculateIconCount());
+        }
+
+        private void UpdateRangeEndConstraints()
+        {
+            if (!int.TryParse(txtBoxRows.Text, out int rows) || rows <= 0 ||
+                !int.TryParse(txtBoxColumns.Text, out int columns) || columns <= 0)
+            {
+                return; // Exit if grid dimensions are invalid
+            }
+
+            maxIcons = rows * columns; // Total cells in the grid
+
+            // Calculate the available space based on the starting position
+            int startRow = selectedCell.X; // Row of the starting cell
+            int startColumn = selectedCell.Y; // Column of the starting cell
+            int remainingRows = rows - startRow;
+            int remainingColumns = columns - startColumn;
+
+            // Calculate the available icons based on grid space
+            int availableIcons = (remainingRows - 1) * columns + remainingColumns;
+
+            int startId = (int)nudBatchAddRangeStart.Value;
+
+            // Calculate valid range for nudBatchAddRangeEnd
+            int minEnd = startId;
+            int maxEnd = Math.Min(9999, startId + availableIcons - 1); // Enforce hard limit at 9999
+
+            // Update constraints for nudBatchAddRangeEnd
+            nudBatchAddRangeEnd.Minimum = minEnd;
+            nudBatchAddRangeEnd.Maximum = maxEnd;
+
+            // Ensure the current end value respects the constraints
+            if (nudBatchAddRangeEnd.Value < minEnd)
+            {
+                nudBatchAddRangeEnd.Value = minEnd;
+            }
+            else if (nudBatchAddRangeEnd.Value > maxEnd)
+            {
+                nudBatchAddRangeEnd.Value = maxEnd;
+            }
+        }
+
+        private void UpdateRange(int? newStart = null, int? newEnd = null)
+        {
+            // Temporarily disable events to prevent recursion
+            nudBatchAddRangeStart.ValueChanged -= nudBatchAddRangeStart_ValueChanged;
+            nudBatchAddRangeEnd.ValueChanged -= nudBatchAddRangeEnd_ValueChanged;
+
+            // Update start value if provided
+            if (newStart.HasValue)
+            {
+                nudBatchAddRangeStart.Value = newStart.Value;
+            }
+
+            // Update constraints before calculating the new end value
+            UpdateRangeEndConstraints();
+
+            // Calculate the intended new End value based on the preserved rangeDifference
+            int currentStart = (int)nudBatchAddRangeStart.Value;
+            int calculatedEnd = rangeDifference == 0 ? currentStart : currentStart + rangeDifference;
+
+            // Ensure calculatedEnd respects the updated constraints and the hard limit of 9999
+            calculatedEnd = Math.Min(9999, Math.Max((int)nudBatchAddRangeEnd.Minimum, Math.Min((int)nudBatchAddRangeEnd.Maximum, calculatedEnd)));
+
+            // Update end value if a new one is provided or use the calculated value
+            if (newEnd.HasValue)
+            {
+                nudBatchAddRangeEnd.Value = newEnd.Value;
+            }
+            else
+            {
+                nudBatchAddRangeEnd.Value = calculatedEnd;
+            }
+
+            // Recalculate and preserve the rangeDifference
+            rangeDifference = (int)nudBatchAddRangeEnd.Value - (int)nudBatchAddRangeStart.Value;
+
+            // Re-enable events
+            nudBatchAddRangeStart.ValueChanged += nudBatchAddRangeStart_ValueChanged;
+            nudBatchAddRangeEnd.ValueChanged += nudBatchAddRangeEnd_ValueChanged;
+
+            // Update the grid preview
+            HighlightGrid(CalculateIconCount());
         }
 
         private void lblDivider_Click(object sender, EventArgs e)
@@ -89,9 +191,19 @@ namespace DRB_Icon_Appender
 
         }
 
+        private void txtBoxWidth_TextChanged(object sender, EventArgs e)
+        {
+            UpdateEffectiveTileSize();
+        }
+
         private void txtBoxHeight_TextChanged(object sender, EventArgs e)
         {
+            UpdateEffectiveTileSize();
+        }
 
+        private void txtBoxMargins_TextChanged(object sender, EventArgs e)
+        {
+            UpdateEffectiveTileSize();
         }
 
         private void grpBoxIconResolution_Enter(object sender, EventArgs e)
@@ -109,6 +221,8 @@ namespace DRB_Icon_Appender
             // Recalculate and highlight the range
             int totalIcons = CalculateIconCount();
             HighlightGrid(totalIcons);
+
+            UpdateRangeEndConstraints();
         }
 
         private void txtBoxColumns_TextChanged(object sender, EventArgs e)
@@ -121,10 +235,27 @@ namespace DRB_Icon_Appender
             // Recalculate and highlight the range
             int totalIcons = CalculateIconCount();
             HighlightGrid(totalIcons);
+
+            UpdateRangeEndConstraints();
         }
 
         private void btnConfirm_Click(object sender, EventArgs e)
         {
+            // Validate width
+            if (!int.TryParse(txtBoxWidth.Text, out int width) || width <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive integer for Width.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Validate height
+            if (!int.TryParse(txtBoxHeight.Text, out int height) || height <= 0)
+            {
+                MessageBox.Show("Please enter a valid positive integer for Height.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Validate rows and columns
             if (!int.TryParse(txtBoxRows.Text, out int rows) || rows <= 0)
             {
                 MessageBox.Show("Please enter a valid positive integer for Rows.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -143,6 +274,16 @@ namespace DRB_Icon_Appender
                 return;
             }
 
+            // Validate for duplicate IDs
+            if (mainForm.RangeHasDuplicates(RangeStart, RangeEnd, out List<int> duplicateIds))
+            {
+                string duplicateMessage = $"The following IDs are already in use: {string.Join(", ", duplicateIds)}.";
+                MessageBox.Show(duplicateMessage, "Duplicate IDs Detected", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // Prevent the form from closing
+                return;
+            }
+
             // Set DialogResult to OK to signal that the operation can proceed
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -151,21 +292,6 @@ namespace DRB_Icon_Appender
         private void FormBatchAdd_Load(object sender, EventArgs e)
         {
 
-        }
-        public int PixelMargin
-        {
-            get
-            {
-                if (int.TryParse(txtBoxMargins.Text, out int margin) && margin >= 0)
-                {
-                    return margin;
-                }
-                else
-                {
-                    MessageBox.Show("Please enter a valid non-negative integer for the pixel margin.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return 2; // Default margin if input is invalid
-                }
-            }
         }
 
         private void lblMargins_Click(object sender, EventArgs e)
@@ -212,7 +338,7 @@ namespace DRB_Icon_Appender
                         BackColor = (row == 0 && col == 0) ? Color.LightBlue : Color.White // Default selection
                     };
 
-                    btn.Click += GridCell_Click; // Attach click event
+                    btn.MouseDown += GridCell_MouseDown; // Attach MouseDown event
                     gridButtons[row, col] = btn;
                     pnlGridPreview.Controls.Add(btn);
                 }
@@ -223,55 +349,84 @@ namespace DRB_Icon_Appender
 
         private void HighlightGrid(int totalIcons)
         {
-            // Reset all cells to default color
             foreach (var btn in gridButtons)
             {
                 btn.BackColor = Color.White;
             }
 
-            // Highlight the starting cell in darker blue
             gridButtons[selectedCell.X, selectedCell.Y].BackColor = ColorTranslator.FromHtml("#3287c1");
 
-            // Highlight the subsequent cells
             int currentRow = selectedCell.X;
             int currentCol = selectedCell.Y;
 
-            for (int i = 1; i < totalIcons; i++) // Start from the second icon
+            for (int i = 1; i < totalIcons; i++)
             {
                 currentCol++;
 
-                // Move to the next row if we exceed the current column count
                 if (currentCol >= gridButtons.GetLength(1))
                 {
                     currentCol = 0;
                     currentRow++;
 
-                    // Stop if we exceed the grid dimensions
                     if (currentRow >= gridButtons.GetLength(0))
                     {
                         break;
                     }
                 }
 
-                // Highlight the cell
                 gridButtons[currentRow, currentCol].BackColor = Color.LightBlue;
             }
         }
-
-        private void GridCell_Click(object sender, EventArgs e)
+        private void GridCell_MouseDown(object sender, MouseEventArgs e)
         {
             if (sender is Button clickedButton)
             {
-                // Deselect previously selected range
-                HighlightGrid(0);
+                // Get the clicked cell's position
+                Point clickedCell = (Point)clickedButton.Tag;
 
-                // Update the selected cell
-                selectedCell = (Point)clickedButton.Tag;
+                if (e.Button == MouseButtons.Left)
+                {
+                    // Handle left-click: update the starting position
+                    selectedCell = clickedCell;
 
-                // Recalculate and highlight the range
-                int totalIcons = CalculateIconCount();
-                HighlightGrid(totalIcons);
+                    // Recalculate constraints and range
+                    UpdateRangeEndConstraints();
+
+                    // Recalculate the grid preview
+                    HighlightGrid(CalculateIconCount());
+                }
+                else if (e.Button == MouseButtons.Right)
+                {
+                    // Handle right-click: update the end value to include the clicked cell
+                    AdjustEndValueToIncludeCell(clickedCell);
+                }
             }
+        }
+
+        private void AdjustEndValueToIncludeCell(Point targetCell)
+        {
+            // Calculate the number of icons between the selected starting cell and the target cell
+            int targetRow = targetCell.X;
+            int targetCol = targetCell.Y;
+
+            int startRow = selectedCell.X;
+            int startCol = selectedCell.Y;
+
+            // Determine the row and column difference
+            int rowDifference = targetRow - startRow;
+            int colDifference = targetCol - startCol;
+
+            // Calculate the total number of icons
+            int totalIcons = rowDifference * gridButtons.GetLength(1) + colDifference + 1;
+
+            // Update the end value based on the calculated totalIcons
+            int newEndValue = (int)nudBatchAddRangeStart.Value + totalIcons - 1;
+
+            // Ensure the new end value respects constraints and the hard limit of 9999
+            newEndValue = Math.Min(9999, Math.Min((int)nudBatchAddRangeEnd.Maximum, Math.Max((int)nudBatchAddRangeEnd.Minimum, newEndValue)));
+
+            // Update the end value
+            UpdateRange(null, newEndValue);
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -280,6 +435,43 @@ namespace DRB_Icon_Appender
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblEffectiveTileSize_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void UpdateEffectiveTileSize()
+        {
+            if (int.TryParse(txtBoxWidth.Text, out int width) &&
+                int.TryParse(txtBoxHeight.Text, out int height) &&
+                int.TryParse(txtBoxMargins.Text, out int margin))
+            {
+                int effectiveWidth = width + (margin * 2);
+                int effectiveHeight = height + (margin * 2);
+
+                lblEffectiveTileSize.Text = $"Effective Tile Size: {effectiveWidth}x{effectiveHeight}";
+            }
+            else
+            {
+                lblEffectiveTileSize.Text = "Effective Tile Size: Invalid Input";
+            }
+        }
+
+        private void txtBoxMargins_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblPixels_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblGridExplanation_Click(object sender, EventArgs e)
         {
 
         }
