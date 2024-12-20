@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -51,13 +52,30 @@ namespace DRB_Icon_Appender
             txtBoxHeight.TextChanged += txtBoxHeight_TextChanged;
             txtBoxMargins.TextChanged += txtBoxMargins_TextChanged;
 
+            // Ensure "Auto Set" logic applies on load
+            if (chkAutoSet.Checked)
+            {
+                ChkAutoSet_CheckedChanged(chkAutoSet, EventArgs.Empty);
+            }
+
+            // Attach event handlers
+            comboBoxTexture.SelectedIndexChanged += comboBoxTexture_SelectedIndexChanged;
+            chkAutoSet.CheckedChanged += ChkAutoSet_CheckedChanged;
+
             // Update Effective Tile Size on load
             UpdateEffectiveTileSize();
+
+            // Ensure the first texture is fully processed
+            if (comboBoxTexture.Items.Count > 0)
+            {
+                comboBoxTexture.SelectedIndex = 0; // Select the first texture
+                comboBoxTexture_SelectedIndexChanged(comboBoxTexture, EventArgs.Empty); // Simulate selection
+            }
         }
 
         public int RangeStart => (int)nudBatchAddRangeStart.Value;
         public int RangeEnd => (int)nudBatchAddRangeEnd.Value;
-        public string SelectedTexture => comboBoxTexture.SelectedItem.ToString();
+        public string SelectedTexture => comboBoxTexture.SelectedItem?.ToString();
         public int Width => int.Parse(txtBoxWidth.Text);
         public int Height => int.Parse(txtBoxHeight.Text);
         public int PixelMargin => int.Parse(txtBoxMargins.Text);
@@ -69,17 +87,25 @@ namespace DRB_Icon_Appender
         private const int MaxPanelWidth = 292;  // Maximum width of the grid panel
         private const int MaxPanelHeight = 292; // Maximum height of the grid panel
 
+        private void FormBatchAdd_Load(object sender, EventArgs e)
+        {
+
+        }
 
         private void PopulateTextureDropdown()
         {
-            List<string> sortedTextures = new List<string>(textures);
-            sortedTextures.Sort(); // Ensure the textures are sorted
-            comboBoxTexture.DataSource = sortedTextures; // Bind the sorted list to the ComboBox
-        }
+            List<string> filteredTextures = textures
+                .Where(texture => texture.StartsWith("Icon"))
+                .OrderBy(texture => texture)
+                .ToList();
 
-        private void grpBoxIconRange_Enter(object sender, EventArgs e)
-        {
+            comboBoxTexture.DataSource = filteredTextures;
 
+            if (filteredTextures.Any())
+            {
+                comboBoxTexture.SelectedIndex = 0; // Ensure the first item is selected
+                comboBoxTexture_SelectedIndexChanged(comboBoxTexture, EventArgs.Empty); // Trigger logic for the first item
+            }
         }
 
         private void nudBatchAddRangeStart_ValueChanged(object sender, EventArgs e)
@@ -179,26 +205,6 @@ namespace DRB_Icon_Appender
             HighlightGrid(CalculateIconCount());
         }
 
-        private void lblDivider_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void grpBoxTexture_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void lblWidth_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void lblHeight_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void txtBoxWidth_TextChanged(object sender, EventArgs e)
         {
             UpdateEffectiveTileSize();
@@ -225,78 +231,47 @@ namespace DRB_Icon_Appender
 
         private void comboBoxTexture_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string selectedTexture = comboBoxTexture.SelectedItem.ToString();
+            string selectedTexture = comboBoxTexture.SelectedItem?.ToString();
+            if (string.IsNullOrEmpty(selectedTexture)) return;
 
-            // Filter all sprites with the selected texture
-            var matchingSprites = mainForm.Sprites.Where(sprite => sprite.Texture == selectedTexture).ToList();
+            UpdateInputsForTexture(selectedTexture);
+            GenerateGrid(int.Parse(txtBoxRows.Text), int.Parse(txtBoxColumns.Text));
+            UpdateOccupiedCells();
+            AutoSetGridSize(); // Trigger Auto Set
+            HighlightGrid(CalculateIconCount());
+            UpdateTooltips();
+        }
+
+        private void UpdateInputsForTexture(string selectedTexture)
+        {
+            // Find the most common dimensions for this texture
+            var matchingSprites = sprites
+                .Where(sprite => sprite.Texture == selectedTexture)
+                .ToList();
+
             if (!matchingSprites.Any())
             {
-                txtBoxWidth.Text = "80"; // Default to 80x80 if no entries found
-                txtBoxHeight.Text = "80";
-                txtBoxRows.Text = "6";
-                txtBoxColumns.Text = "6";
-                UpdateTooltips(); // Clear any old tooltips
                 return;
             }
 
-            // Group by resolution to find the most common width and height
-            var resolutionGroups = matchingSprites
+            // Determine the most common dimensions
+            var mostCommonDimensions = matchingSprites
                 .GroupBy(sprite => new { sprite.Width, sprite.Height })
                 .OrderByDescending(group => group.Count())
-                .First();
+                .First()
+                .Key;
 
-            int mostCommonWidth = resolutionGroups.Key.Width;
-            int mostCommonHeight = resolutionGroups.Key.Height;
+            txtBoxWidth.Text = mostCommonDimensions.Width.ToString();
+            txtBoxHeight.Text = mostCommonDimensions.Height.ToString();
 
-            // Set the most common resolution
-            txtBoxWidth.Text = mostCommonWidth.ToString();
-            txtBoxHeight.Text = mostCommonHeight.ToString();
-
-            int tileSize = mostCommonWidth + (PixelMargin * 2); // Effective tile size
-
-            // Calculate occupied rows and columns based on most common resolution
-            var occupiedPositions = resolutionGroups
-                .Select(sprite => new
-                {
-                    Row = (sprite.TopEdge - 1) / tileSize,
-                    Column = (sprite.LeftEdge - 1) / tileSize
-                })
-                .Distinct()
-                .ToList();
-
-            // Determine the max occupied row and column
-            int maxOccupiedRow = occupiedPositions.Max(pos => pos.Row) + 1; // +1 to include zero-based index
-            int maxOccupiedColumn = occupiedPositions.Max(pos => pos.Column) + 1;
-
-            // Determine the min occupied row and column to trim unoccupied leading cells
-            int minOccupiedRow = occupiedPositions.Min(pos => pos.Row);
-            int minOccupiedColumn = occupiedPositions.Min(pos => pos.Column);
-
-            // Adjust rows and columns by trimming unoccupied areas
-            int effectiveRows = maxOccupiedRow - minOccupiedRow;
-            int effectiveColumns = maxOccupiedColumn - minOccupiedColumn;
-
-            // Adjust odd dimensions if near-square
-            if (Math.Abs(effectiveRows - effectiveColumns) <= 3)
+            // Optionally set a default margin if it's not part of the sprite
+            if (int.TryParse(txtBoxMargins.Text, out int margin) && margin >= 0)
             {
-                int maxDimension = Math.Max(effectiveRows, effectiveColumns);
-                effectiveRows = maxDimension;
-                effectiveColumns = maxDimension;
             }
-
-            // Update textboxes with adjusted dimensions
-            txtBoxRows.Text = effectiveRows.ToString();
-            txtBoxColumns.Text = effectiveColumns.ToString();
-
-            // Update occupied cells and grid
-            UpdateOccupiedCells();
-            HighlightGrid(CalculateIconCount());
-            UpdateTooltips(); // Ensure tooltips are updated
-        }
-
-        private void grpBoxIconResolution_Enter(object sender, EventArgs e)
-        {
-
+            else
+            {
+                txtBoxMargins.Text = "2"; // Default margin value
+            }
         }
 
         private void txtBoxRows_TextChanged(object sender, EventArgs e)
@@ -377,16 +352,6 @@ namespace DRB_Icon_Appender
             this.Close();
         }
 
-        private void FormBatchAdd_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void lblMargins_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private int CalculateIconCount()
         {
             int startId = (int)nudBatchAddRangeStart.Value;
@@ -400,65 +365,98 @@ namespace DRB_Icon_Appender
 
         private void GenerateGrid(int rows, int columns)
         {
-            pnlGridPreview.Controls.Clear(); // Clear previous grid
+            pnlGridPreview.Controls.Clear();
             pnlGridPreview.SuspendLayout();
 
             if (rows <= 0 || columns <= 0)
             {
-                gridButtons = null; // Reset gridButtons if invalid dimensions
-                return;
+                gridButtons = null;
+                return; // Exit if invalid dimensions
             }
 
-            // Calculate cell size based on maximum dimensions
-            int cellWidth = Math.Min(MaxPanelWidth / columns, 30); // Default size is 30x30
-            int cellHeight = Math.Min(MaxPanelHeight / rows, 30);
-            int cellSize = Math.Min(cellWidth, cellHeight); // Ensure square cells
+            // Calculate effective tile size
+            if (!int.TryParse(txtBoxWidth.Text, out int width) || width <= 0 ||
+                !int.TryParse(txtBoxHeight.Text, out int height) || height <= 0 ||
+                !int.TryParse(txtBoxMargins.Text, out int margin) || margin < 0)
+            {
+                gridButtons = null;
+                return; // Exit on invalid input
+            }
 
-            // Adjust panel size to fit the grid
-            pnlGridPreview.Width = Math.Min(columns * cellSize, MaxPanelWidth);
-            pnlGridPreview.Height = Math.Min(rows * cellSize, MaxPanelHeight);
+            int effectiveWidth = width + (margin * 2);
+            int effectiveHeight = height + (margin * 2);
+
+            // Calculate aspect ratio
+            float cellAspectRatio = (float)effectiveWidth / effectiveHeight;
+
+            // Calculate the maximum cell size to fit within the panel
+            int maxCellWidth = MaxPanelWidth / columns;
+            int maxCellHeight = MaxPanelHeight / rows;
+
+            // Adjust cell dimensions to maintain aspect ratio
+            int cellWidth, cellHeight;
+
+            if (cellAspectRatio > 1) // Wider than tall
+            {
+                cellWidth = Math.Min(maxCellWidth, maxCellHeight * effectiveWidth / effectiveHeight);
+                cellHeight = cellWidth * effectiveHeight / effectiveWidth;
+            }
+            else // Taller than wide
+            {
+                cellHeight = Math.Min(maxCellHeight, maxCellWidth * effectiveHeight / effectiveWidth);
+                cellWidth = cellHeight * effectiveWidth / effectiveHeight;
+            }
+
+            // Adjust the grid panel size to center the grid
+            int gridWidth = columns * cellWidth;
+            int gridHeight = rows * cellHeight;
+
+            pnlGridPreview.Width = gridWidth;
+            pnlGridPreview.Height = gridHeight;
 
             gridButtons = new Button[rows, columns];
+
+            // Initialize grid cells
             for (int row = 0; row < rows; row++)
             {
                 for (int col = 0; col < columns; col++)
                 {
                     Button btn = new Button
                     {
-                        Width = cellSize,
-                        Height = cellSize,
-                        Location = new Point(col * cellSize, row * cellSize),
-                        Tag = new Point(row, col), // Store row and column as tag
+                        Width = cellWidth,
+                        Height = cellHeight,
+                        Location = new Point(col * cellWidth, row * cellHeight),
+                        Tag = new Point(row, col), // Store row and column
                         BackColor = Color.White // Default color
                     };
 
-                    btn.MouseDown += GridCell_MouseDown; // Attach MouseDown event
+                    btn.MouseDown += GridCell_MouseDown; // Attach event
                     gridButtons[row, col] = btn;
                     pnlGridPreview.Controls.Add(btn);
                 }
             }
 
             pnlGridPreview.ResumeLayout();
-
-            HighlightExistingIcons(); // Apply highlights after regenerating grid
+            HighlightExistingIcons(); // Apply initial shading
+            UpdateTooltips(); // Initialize tooltips
         }
 
         private void UpdateTooltips()
         {
+            if (gridButtons == null || sprites == null) return;
+
             if (!int.TryParse(txtBoxWidth.Text, out int width) || width <= 0 ||
                 !int.TryParse(txtBoxHeight.Text, out int height) || height <= 0 ||
                 !int.TryParse(txtBoxMargins.Text, out int margin) || margin < 0)
             {
-                return; // Exit if dimensions or margin are invalid
+                return; // Exit on invalid dimensions
             }
 
             string selectedTexture = comboBoxTexture.SelectedItem?.ToString();
-            if (string.IsNullOrEmpty(selectedTexture))
-            {
-                return; // Exit if no texture is selected
-            }
+            if (string.IsNullOrEmpty(selectedTexture)) return;
 
-            int tileSize = width + (margin * 2);
+            int effectiveWidth = width + (margin * 2);
+            int effectiveHeight = height + (margin * 2);
 
             foreach (var sprite in sprites)
             {
@@ -466,17 +464,19 @@ namespace DRB_Icon_Appender
                     sprite.Width == width &&
                     sprite.Height == height)
                 {
-                    int row = (sprite.TopEdge - 1) / tileSize;
-                    int col = (sprite.LeftEdge - 1) / tileSize;
+                    int row = (sprite.TopEdge - 1) / effectiveHeight;
+                    int col = (sprite.LeftEdge - 1) / effectiveWidth;
 
                     if (row >= 0 && row < gridButtons.GetLength(0) &&
                         col >= 0 && col < gridButtons.GetLength(1))
                     {
                         Button cellButton = gridButtons[row, col];
 
-                        // Add or update the tooltip for this cell
-                        string tooltipText = $"ID: {sprite.ID}\nResolution: {sprite.Width}x{sprite.Height}";
-                        gridToolTip.SetToolTip(cellButton, tooltipText);
+                        if (cellButton != null)
+                        {
+                            string tooltipText = $"ID: {sprite.ID}\nResolution: {sprite.Width}x{sprite.Height}";
+                            gridToolTip.SetToolTip(cellButton, tooltipText);
+                        }
                     }
                 }
             }
@@ -484,50 +484,47 @@ namespace DRB_Icon_Appender
 
         private void HighlightGrid(int totalIcons)
         {
-            if (gridButtons == null)
-                return; // Exit if gridButtons is null
+            if (gridButtons == null) return;
 
             foreach (var btn in gridButtons)
             {
+                if (btn == null) continue;
+
                 Point cell = (Point)btn.Tag;
 
-                // Determine the base color of the cell
                 if (occupiedCells != null && occupiedCells.ContainsKey(cell))
                 {
-                    btn.BackColor = Color.Gray; // Persistent gray for occupied cells
+                    btn.BackColor = Color.Gray; // Occupied cells
                 }
                 else
                 {
-                    btn.BackColor = Color.White; // Default for unoccupied cells
+                    btn.BackColor = Color.White; // Default unoccupied
                 }
             }
 
+            // Highlight selected range
             int currentRow = selectedCell.X;
             int currentCol = selectedCell.Y;
 
-            // Highlight the selected and subsequent boxes in the range
             for (int i = 0; i < totalIcons; i++)
             {
                 if (currentRow >= gridButtons.GetLength(0)) break;
 
                 Button currentButton = gridButtons[currentRow, currentCol];
+                if (currentButton == null) continue;
 
-                // Check for overlap with occupied cells
                 Point currentCell = new Point(currentRow, currentCol);
+
                 if (occupiedCells != null && occupiedCells.ContainsKey(currentCell))
                 {
-                    currentButton.BackColor = i == 0
-                        ? Color.DarkRed  // Overlapping starting box
-                        : Color.LightCoral; // Overlapping subsequent box
+                    currentButton.BackColor = i == 0 ? Color.DarkRed : Color.LightCoral; // Overlapping
                 }
                 else
                 {
-                    currentButton.BackColor = i == 0
-                        ? Color.DarkBlue  // Selected starting box
-                        : Color.LightBlue; // Subsequent boxes
+                    currentButton.BackColor = i == 0 ? Color.DarkBlue : Color.LightBlue; // Selected
                 }
 
-                // Move to the next cell
+                // Move to next cell
                 currentCol++;
                 if (currentCol >= gridButtons.GetLength(1))
                 {
@@ -539,36 +536,23 @@ namespace DRB_Icon_Appender
 
         private void HighlightExistingIcons()
         {
-            if (!int.TryParse(txtBoxWidth.Text, out int width) || width <= 0 ||
-                !int.TryParse(txtBoxHeight.Text, out int height) || height <= 0 ||
-                !int.TryParse(txtBoxMargins.Text, out int margin) || margin < 0)
-            {
-                return; // Exit if dimensions or margin are invalid
-            }
-
-            string selectedTexture = comboBoxTexture.SelectedItem?.ToString();
-            if (string.IsNullOrEmpty(selectedTexture))
-            {
-                return; // Exit if no texture is selected
-            }
-
-            int tileSize = width + (margin * 2);
-
             foreach (var sprite in sprites)
             {
-                if (sprite.Texture == selectedTexture &&
-                    sprite.Width == width &&
-                    sprite.Height == height)
+                if (sprite.Texture == SelectedTexture &&
+                    sprite.Width == Width &&
+                    sprite.Height == Height)
                 {
-                    // Calculate the grid position
-                    int row = (sprite.TopEdge - 1) / tileSize;
-                    int col = (sprite.LeftEdge - 1) / tileSize;
+                    // Calculate grid position based on effective tile size
+                    int effectiveWidth = Width + (PixelMargin * 2);
+                    int effectiveHeight = Height + (PixelMargin * 2);
+
+                    int row = (sprite.TopEdge - 1) / effectiveHeight;
+                    int col = (sprite.LeftEdge - 1) / effectiveWidth;
 
                     if (row >= 0 && row < gridButtons.GetLength(0) &&
                         col >= 0 && col < gridButtons.GetLength(1))
                     {
-                        Button cell = gridButtons[row, col];
-                        cell.BackColor = Color.DarkGray; // Mark as occupied
+                        gridButtons[row, col].BackColor = Color.DarkGray; // Indicate occupied
                     }
                 }
             }
@@ -634,6 +618,83 @@ namespace DRB_Icon_Appender
 
         }
 
+        private void AutoSetGridSize()
+        {
+            if (!chkAutoSet.Checked) return; // Ensure auto set is enabled
+
+            string selectedTexture = comboBoxTexture.SelectedItem?.ToString();
+            if (string.IsNullOrEmpty(selectedTexture))
+            {
+                return; // Exit if no texture is selected
+            }
+
+            int width, height;
+            if (!int.TryParse(txtBoxWidth.Text, out width) || width <= 0 ||
+                !int.TryParse(txtBoxHeight.Text, out height) || height <= 0)
+            {
+                return; // Exit on invalid dimensions
+            }
+
+            // Default grid size to 11x12
+            int rows = 11;
+            int columns = 12;
+
+            // Adjust grid size based on texture and conditions
+            if (width == 160 && height == 180)
+            {
+                // Special case for Icon40, Icon12, or Icon21
+                if ((selectedTexture == "Icon40" || selectedTexture == "Icon12" || selectedTexture == "Icon21") &&
+                    !HasOccupiedCellsBeyondRow(5))
+                {
+                    rows = 5;
+                }
+            }
+            else if (width == 80 && height == 80)
+            {
+                // Special case for Icon50
+                if (selectedTexture == "Icon50" &&
+                    !HasOccupiedCellsBeyondRow(6) &&
+                    !HasOccupiedCellsBeyondColumn(6))
+                {
+                    rows = 6;
+                    columns = 6;
+                }
+                else
+                {
+                    rows = 12;
+                    columns = 12;
+                }
+            }
+
+            // Apply the calculated grid size
+            txtBoxRows.Text = rows.ToString();
+            txtBoxColumns.Text = columns.ToString();
+        }
+
+        private bool HasOccupiedCellsBeyondRow(int maxRow)
+        {
+            foreach (var cell in occupiedCells.Keys)
+            {
+                if (cell.X > maxRow)
+                {
+                    return true; // Found an occupied cell beyond the row limit
+                }
+            }
+            return false; // No occupied cells beyond the row limit
+        }
+
+        private bool HasOccupiedCellsBeyondColumn(int maxColumn)
+        {
+            foreach (var cell in occupiedCells.Keys)
+            {
+                if (cell.Y > maxColumn)
+                {
+                    return true; // Found an occupied cell beyond the column limit
+                }
+            }
+            return false; // No occupied cells beyond the column limit
+        }
+
         private void UpdateEffectiveTileSize()
         {
             if (int.TryParse(txtBoxWidth.Text, out int width) &&
@@ -644,6 +705,16 @@ namespace DRB_Icon_Appender
                 int effectiveHeight = height + (margin * 2);
 
                 lblEffectiveTileSize.Text = $"Effective Tile Size: {effectiveWidth}x{effectiveHeight}";
+
+                // Regenerate the grid with the updated tile size
+                if (int.TryParse(txtBoxRows.Text, out int rows) && rows > 0 &&
+                    int.TryParse(txtBoxColumns.Text, out int columns) && columns > 0)
+                {
+                    GenerateGrid(rows, columns); // Refresh the grid preview
+                    UpdateOccupiedCells();       // Ensure occupied cells are recalculated
+                    HighlightGrid(CalculateIconCount());
+                    UpdateTooltips();
+                }
             }
             else
             {
@@ -653,42 +724,52 @@ namespace DRB_Icon_Appender
 
         private void UpdateOccupiedCells()
         {
-            if (mainForm == null || mainForm.Sprites == null)
-            {
-                occupiedCells = new Dictionary<Point, bool>();
-                return; // Exit if mainForm or Sprites is null
-            }
-
-            int tileSize = Width + (PixelMargin * 2); // Effective tile size
             occupiedCells = new Dictionary<Point, bool>();
 
-            foreach (var sprite in mainForm.Sprites)
+            if (!int.TryParse(txtBoxWidth.Text, out int width) || width <= 0 ||
+                !int.TryParse(txtBoxHeight.Text, out int height) || height <= 0 ||
+                !int.TryParse(txtBoxMargins.Text, out int margin) || margin < 0)
             {
-                if (sprite.Texture == SelectedTexture && sprite.Width == Width && sprite.Height == Height)
-                {
-                    // Calculate the grid cell from the sprite's coordinates
-                    int column = (sprite.LeftEdge - 1) / tileSize;
-                    int row = (sprite.TopEdge - 1) / tileSize;
+                return;
+            }
 
-                    Point cell = new Point(row, column);
+            string selectedTexture = SelectedTexture;
+            if (string.IsNullOrEmpty(selectedTexture))
+            {
+                return;
+            }
+
+            int effectiveWidth = width + (margin * 2);
+            int effectiveHeight = height + (margin * 2);
+
+            foreach (var sprite in sprites)
+            {
+                if (sprite.Texture == selectedTexture && sprite.Width == width && sprite.Height == height)
+                {
+                    int row = (sprite.TopEdge - 1) / effectiveHeight;
+                    int col = (sprite.LeftEdge - 1) / effectiveWidth;
+
+                    Point cell = new Point(row, col);
                     occupiedCells[cell] = true;
                 }
             }
         }
 
-        private void txtBoxMargins_TextChanged_1(object sender, EventArgs e)
+        private void ChkAutoSet_CheckedChanged(object sender, EventArgs e)
         {
+            bool isAutoSetEnabled = chkAutoSet.Checked;
 
-        }
+            // Enable/disable the input fields based on the checkbox state
+            txtBoxRows.Enabled = !isAutoSetEnabled;
+            txtBoxColumns.Enabled = !isAutoSetEnabled;
+            txtBoxWidth.Enabled = !isAutoSetEnabled;
+            txtBoxHeight.Enabled = !isAutoSetEnabled;
+            txtBoxMargins.Enabled = !isAutoSetEnabled;
 
-        private void lblPixels_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void lblGridExplanation_Click(object sender, EventArgs e)
-        {
-
+            if (isAutoSetEnabled)
+            {
+                AutoSetGridSize(); // Trigger Auto Set logic when enabled
+            }
         }
     }
 }

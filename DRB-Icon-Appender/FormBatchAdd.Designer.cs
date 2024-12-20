@@ -51,12 +51,13 @@
             this.txtBoxColumns = new System.Windows.Forms.TextBox();
             this.lblColumns = new System.Windows.Forms.Label();
             this.grpBoxGridSize = new System.Windows.Forms.GroupBox();
+            this.chkAutoSet = new System.Windows.Forms.CheckBox();
             this.btnConfirm = new System.Windows.Forms.Button();
             this.toolTipMargins = new System.Windows.Forms.ToolTip(this.components);
             this.pnlGridPreview = new System.Windows.Forms.Panel();
             this.grpBoxGridPreview = new System.Windows.Forms.GroupBox();
-            this.btnCancel = new System.Windows.Forms.Button();
             this.lblGridExplanation = new System.Windows.Forms.Label();
+            this.btnCancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nudBatchAddRangeStart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudBatchAddRangeEnd)).BeginInit();
             this.grpBoxIconRange.SuspendLayout();
@@ -120,7 +121,6 @@
             this.grpBoxIconRange.TabIndex = 2;
             this.grpBoxIconRange.TabStop = false;
             this.grpBoxIconRange.Text = "Icon Range";
-            this.grpBoxIconRange.Enter += new System.EventHandler(this.grpBoxIconRange_Enter);
             // 
             // lblDivider
             // 
@@ -130,7 +130,6 @@
             this.lblDivider.TabIndex = 0;
             this.lblDivider.Text = "to";
             this.lblDivider.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblDivider.Click += new System.EventHandler(this.lblDivider_Click);
             // 
             // grpBoxTexture
             // 
@@ -141,7 +140,6 @@
             this.grpBoxTexture.TabIndex = 3;
             this.grpBoxTexture.TabStop = false;
             this.grpBoxTexture.Text = "Texture";
-            this.grpBoxTexture.Enter += new System.EventHandler(this.grpBoxTexture_Enter);
             // 
             // comboBoxTexture
             // 
@@ -160,7 +158,6 @@
             this.txtBoxWidth.TabIndex = 4;
             this.txtBoxWidth.Text = "80";
             this.txtBoxWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtBoxHeight.TextChanged += new System.EventHandler(this.txtBoxWidth_TextChanged);
             // 
             // txtBoxHeight
             // 
@@ -180,7 +177,6 @@
             this.lblWidth.Size = new System.Drawing.Size(35, 13);
             this.lblWidth.TabIndex = 6;
             this.lblWidth.Text = "Width";
-            this.lblWidth.Click += new System.EventHandler(this.lblWidth_Click);
             // 
             // lblHeight
             // 
@@ -190,7 +186,6 @@
             this.lblHeight.Size = new System.Drawing.Size(38, 13);
             this.lblHeight.TabIndex = 7;
             this.lblHeight.Text = "Height";
-            this.lblHeight.Click += new System.EventHandler(this.lblHeight_Click);
             // 
             // grpBoxIconResolution
             // 
@@ -209,7 +204,6 @@
             this.grpBoxIconResolution.TabIndex = 8;
             this.grpBoxIconResolution.TabStop = false;
             this.grpBoxIconResolution.Text = "Icon Resolution";
-            this.grpBoxIconResolution.Enter += new System.EventHandler(this.grpBoxIconResolution_Enter);
             // 
             // lblEffectiveTileSize
             // 
@@ -220,7 +214,6 @@
             this.lblEffectiveTileSize.TabIndex = 12;
             this.lblEffectiveTileSize.Text = "Effective Tile Size: ";
             this.lblEffectiveTileSize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblEffectiveTileSize.Click += new System.EventHandler(this.lblEffectiveTileSize_Click);
             // 
             // lblMarginToolTip
             // 
@@ -243,7 +236,6 @@
             this.lblPixels.Size = new System.Drawing.Size(18, 13);
             this.lblPixels.TabIndex = 10;
             this.lblPixels.Text = "px";
-            this.lblPixels.Click += new System.EventHandler(this.lblPixels_Click);
             // 
             // lblMargins
             // 
@@ -253,7 +245,6 @@
             this.lblMargins.Size = new System.Drawing.Size(44, 13);
             this.lblMargins.TabIndex = 9;
             this.lblMargins.Text = "Margins";
-            this.lblMargins.Click += new System.EventHandler(this.lblMargins_Click);
             // 
             // txtBoxMargins
             // 
@@ -305,20 +296,35 @@
             // 
             // grpBoxGridSize
             // 
+            this.grpBoxGridSize.Controls.Add(this.chkAutoSet);
             this.grpBoxGridSize.Controls.Add(this.txtBoxRows);
             this.grpBoxGridSize.Controls.Add(this.lblRows);
             this.grpBoxGridSize.Controls.Add(this.txtBoxColumns);
             this.grpBoxGridSize.Controls.Add(this.lblColumns);
             this.grpBoxGridSize.Location = new System.Drawing.Point(12, 267);
             this.grpBoxGridSize.Name = "grpBoxGridSize";
-            this.grpBoxGridSize.Size = new System.Drawing.Size(158, 79);
+            this.grpBoxGridSize.Size = new System.Drawing.Size(158, 96);
             this.grpBoxGridSize.TabIndex = 12;
             this.grpBoxGridSize.TabStop = false;
             this.grpBoxGridSize.Text = "Grid Size";
             // 
+            // chkAutoSet
+            // 
+            this.chkAutoSet.AutoSize = true;
+            this.chkAutoSet.Checked = true;
+            this.chkAutoSet.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAutoSet.Location = new System.Drawing.Point(48, 72);
+            this.chkAutoSet.Name = "chkAutoSet";
+            this.chkAutoSet.Size = new System.Drawing.Size(67, 17);
+            this.chkAutoSet.TabIndex = 12;
+            this.chkAutoSet.Text = "Auto Set";
+            this.chkAutoSet.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chkAutoSet.UseVisualStyleBackColor = true;
+            this.chkAutoSet.CheckedChanged += new System.EventHandler(this.ChkAutoSet_CheckedChanged);
+            // 
             // btnConfirm
             // 
-            this.btnConfirm.Location = new System.Drawing.Point(12, 352);
+            this.btnConfirm.Location = new System.Drawing.Point(12, 380);
             this.btnConfirm.Name = "btnConfirm";
             this.btnConfirm.Size = new System.Drawing.Size(335, 23);
             this.btnConfirm.TabIndex = 13;
@@ -340,33 +346,30 @@
             this.grpBoxGridPreview.Controls.Add(this.pnlGridPreview);
             this.grpBoxGridPreview.Location = new System.Drawing.Point(176, 12);
             this.grpBoxGridPreview.Name = "grpBoxGridPreview";
-            this.grpBoxGridPreview.Size = new System.Drawing.Size(304, 334);
+            this.grpBoxGridPreview.Size = new System.Drawing.Size(304, 351);
             this.grpBoxGridPreview.TabIndex = 16;
             this.grpBoxGridPreview.TabStop = false;
             this.grpBoxGridPreview.Text = "Icons to Add (Grid Preview)";
-            this.grpBoxGridPreview.Enter += new System.EventHandler(this.groupBox1_Enter);
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(353, 352);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(127, 23);
-            this.btnCancel.TabIndex = 14;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // lblGridExplanation
             // 
             this.lblGridExplanation.ForeColor = System.Drawing.Color.DimGray;
-            this.lblGridExplanation.Location = new System.Drawing.Point(6, 315);
+            this.lblGridExplanation.Location = new System.Drawing.Point(6, 327);
             this.lblGridExplanation.Name = "lblGridExplanation";
             this.lblGridExplanation.Size = new System.Drawing.Size(292, 13);
             this.lblGridExplanation.TabIndex = 17;
             this.lblGridExplanation.Text = "Left click to set start position. Right click to set end position.";
             this.lblGridExplanation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblGridExplanation.Click += new System.EventHandler(this.lblGridExplanation_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.Location = new System.Drawing.Point(353, 380);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(127, 23);
+            this.btnCancel.TabIndex = 14;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
             // 
             // FormBatchAdd
             // 
@@ -375,7 +378,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(491, 384);
+            this.ClientSize = new System.Drawing.Size(491, 415);
             this.Controls.Add(this.grpBoxGridPreview);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnConfirm);
@@ -432,5 +435,6 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Label lblEffectiveTileSize;
         private System.Windows.Forms.Label lblGridExplanation;
+        private System.Windows.Forms.CheckBox chkAutoSet;
     }
 }

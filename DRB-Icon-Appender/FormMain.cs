@@ -241,20 +241,31 @@ namespace DRB_Icon_Appender
                 return; // Cancel operation if duplicates exist
             }
 
-            int tileSize = width + (margin * 2); // Icon resolution + margin
-            int leftEdge = 1 + startColumn * tileSize; // Start at selected column
-            int topEdge = 1 + startRow * tileSize; // Start at selected row
-            int columnCount = startColumn; // Start at the selected column
-            int rowCount = startRow; // Add row tracking
+            // Correct calculation for tile width and height
+            int tileWidth = width + (2 * margin);  // Full tile width, including margins
+            int tileHeight = height + (2 * margin); // Full tile height, including margins
+
+            // Initialize starting position
+            int leftEdge = 1 + (startColumn * tileWidth);  // Start from the first column
+            int topEdge = 1 + (startRow * tileHeight);     // Start from the first row
+
+            // Initialize row and column counters
+            int currentColumn = startColumn;
+            int currentRow = startRow;
 
             for (int id = startId; id <= endId; id++)
             {
+                // Adjust for non-first icons in the row or column
+                int adjustedLeftEdge = leftEdge + (currentColumn > 0 ? 1 : 0); // +1 if not the first column
+                int adjustedTopEdge = topEdge + (currentRow > 0 ? 1 : 0);      // +1 if not the first row
+
+                // Create the new sprite shape with accurate edges
                 var shape = new DRB.Shape.Sprite()
                 {
-                    TexLeftEdge = (short)leftEdge,
-                    TexTopEdge = (short)topEdge,
-                    TexRightEdge = (short)(leftEdge + width),
-                    TexBottomEdge = (short)(topEdge + height),
+                    TexLeftEdge = (short)adjustedLeftEdge,
+                    TexTopEdge = (short)adjustedTopEdge,
+                    TexRightEdge = (short)(adjustedLeftEdge + width),
+                    TexBottomEdge = (short)(adjustedTopEdge + height),
                 };
 
                 var control = new DRB.Control.Static();
@@ -267,19 +278,20 @@ namespace DRB_Icon_Appender
                 iconBindingSource.Add(sprite);
 
                 // Update Left Edge and Top Edge for the next icon
-                columnCount++;
-                if (columnCount >= columns)
+                currentColumn++;
+
+                if (currentColumn >= columns)
                 {
                     // Move to the next row
-                    columnCount = 0;
-                    leftEdge = 1; // Reset Left Edge
-                    rowCount++;
-                    topEdge = 1 + rowCount * tileSize; // Increment Top Edge by tile size
+                    currentColumn = 0;
+                    currentRow++;
+                    leftEdge = 1;  // Reset Left Edge for the new row
+                    topEdge = 1 + (currentRow * tileHeight); // Increment Top Edge
                 }
                 else
                 {
-                    // Same row: move Left Edge
-                    leftEdge += tileSize;
+                    // Stay in the same row: Increment Left Edge
+                    leftEdge = 1 + (currentColumn * tileWidth);
                 }
             }
 
