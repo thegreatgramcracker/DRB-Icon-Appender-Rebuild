@@ -160,6 +160,7 @@
             this.txtBoxWidth.TabIndex = 4;
             this.txtBoxWidth.Text = "80";
             this.txtBoxWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtBoxHeight.TextChanged += new System.EventHandler(this.txtBoxWidth_TextChanged);
             // 
             // txtBoxHeight
             // 
@@ -262,7 +263,7 @@
             this.txtBoxMargins.TabIndex = 8;
             this.txtBoxMargins.Text = "2";
             this.txtBoxMargins.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtBoxMargins.TextChanged += new System.EventHandler(this.txtBoxMargins_TextChanged_1);
+            this.txtBoxMargins.TextChanged += new System.EventHandler(this.txtBoxMargins_TextChanged);
             // 
             // txtBoxRows
             // 
@@ -342,7 +343,7 @@
             this.grpBoxGridPreview.Size = new System.Drawing.Size(304, 334);
             this.grpBoxGridPreview.TabIndex = 16;
             this.grpBoxGridPreview.TabStop = false;
-            this.grpBoxGridPreview.Text = "Grid Starting Position";
+            this.grpBoxGridPreview.Text = "Icons to Add (Grid Preview)";
             this.grpBoxGridPreview.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // btnCancel

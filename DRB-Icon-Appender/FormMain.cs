@@ -25,6 +25,11 @@ namespace DRB_Icon_Appender
         private List<SpriteWrapper> sprites;
         private BindingSource iconBindingSource;
 
+        internal List<SpriteWrapper> Sprites
+        {
+            get { return sprites; }
+        }
+
         public FormMain()
         {
             InitializeComponent();
@@ -284,7 +289,7 @@ namespace DRB_Icon_Appender
 
         private void btnBatchAddIcons_Click(object sender, EventArgs e)
         {
-            using (var batchAddForm = new FormBatchAdd(this, this.Textures))
+            using (var batchAddForm = new FormBatchAdd(this, this.Textures, this.Sprites))
             {
                 if (batchAddForm.ShowDialog() == DialogResult.OK)
                 {
